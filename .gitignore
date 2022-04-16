@@ -1,3 +1,5 @@
 dependencies/
 .history/
 __pycache__/
+tmp/
+temp/
