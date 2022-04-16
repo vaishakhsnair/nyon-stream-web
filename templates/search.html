@@ -1,0 +1,119 @@
+<html>
+   <head>
+   <title>Nyon-Stream</title>
+   <style>
+      @import url('https://fonts.googleapis.com/css2?family=Bree+Serif&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=ABeeZee&display=swap');     
+      @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@200;400&display=swap');
+      #head
+         {
+            font-size: 400%;
+            color: #697477;
+            text-align: center;
+            font-family: 'Raleway', sans-serif;
+
+         }
+      .searchbar
+      {
+         display:block;
+         align-content: center;
+         width: 100%;
+
+      }
+      form 
+      {
+            background-color: #3b3b3b;
+            width: 300px;
+            height: 44px;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+      }
+      input {
+      all: unset;
+      font: 16px system-ui;
+      color: #fff;
+      height: 100%;
+      width: 100%;
+      padding: 6px 10px;
+      align-content: center;
+      }
+      ::placeholder {
+      color: #fff;
+      opacity: 0.7; 
+      }
+      button {
+      all: unset;
+      cursor: pointer;
+      width: 44px;
+      height: 44px;
+      }
+
+      svg {
+      color: #fff;
+      fill: currentColor;
+      width: 24px;
+      height: 24px;
+      padding: 10px;
+      }
+      .result {
+            color: #697477;
+            text-align: center;
+            font-family: 'Raleway', sans-serif;
+            }
+   </style>
+   </head>
+   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"> </script>
+   <script type="text/javascript">
+
+   function showres(response){
+
+      console.log(response);
+      var resultbox = document.getElementById("result");
+      resultbox.innerHTML = "";
+      values = response.magnets;
+      for(let i=0; i< values.length; i++){
+         var each_line = "<p>" + String(i+1)+ " " + "<a href=/player?magnet="+String(values[i].magnet)+"&id="+values[i].name +" target='_blank' rel='noopener' >"+ values[i].name + "</p>";
+         resultbox.innerHTML += each_line;
+      }
+   }   
+
+   $(document).ready(function() {
+     $("form").on('submit', function(event) {
+        event.preventDefault();
+        $.ajax(
+           {
+              type:"POST",
+              url:"/",
+              data:{"query":$("#query").val()},
+              success:function(response){
+                 showres(response)
+              }
+           }
+        )
+   })
+
+})
+   </script>
+   <body bgcolor="#121212">
+      <p id="head">Nyon Stream</p>
+      <div class="searchbar">
+      <center>
+         <form id="form" >
+            <input type="text" id="query" name="query"
+            placeholder="Search..."
+            aria-label="Search through site content">
+            <button type="submit">
+               <svg viewBox="0 0 1024 1024"><path class="path1" d="M848.471 928l-263.059-263.059c-48.941 36.706-110.118 55.059-177.412 55.059-171.294 0-312-140.706-312-312s140.706-312 312-312c171.294 0 312 140.706 312 312 0 67.294-24.471 128.471-55.059 177.412l263.059 263.059-79.529 79.529zM189.623 408.078c0 121.364 97.091 218.455 218.455 218.455s218.455-97.091 218.455-218.455c0-121.364-103.159-218.455-218.455-218.455-121.364 0-218.455 97.091-218.455 218.455z"></path></svg>
+            </button>
+         </form>
+
+      <br/><br>
+<div class="result" id="result">
+
+
+</div>
+   </center>
+   </body>
+</html>
