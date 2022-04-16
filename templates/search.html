@@ -13,6 +13,13 @@
             font-family: 'Raleway', sans-serif;
 
          }
+      #status
+         {
+            color:#697477;
+            font-family: 'Raleway', sans-serif;
+
+         }
+
       .searchbar
       {
          display:block;
@@ -68,19 +75,30 @@
    <script type="text/javascript">
 
    function showres(response){
-
+      var statbox = document.getElementById("status");
       console.log(response);
-      var resultbox = document.getElementById("result");
-      resultbox.innerHTML = "";
-      values = response.magnets;
-      for(let i=0; i< values.length; i++){
-         var each_line = "<p>" + String(i+1)+ " " + "<a href=/player?magnet="+String(values[i].magnet)+"&id="+values[i].name +" target='_blank' rel='noopener' >"+ values[i].name + "</p>";
-         resultbox.innerHTML += each_line;
+
+      if (response.message != "error"){
+         values = response.magnets;
+         statbox.innerHTML = response.message+",Found "+values.length+" results.";
+         var resultbox = document.getElementById("result");
+         resultbox.innerHTML = "";
+         
+
+         for(let i=0; i< values.length; i++){
+            var each_line = "<p>" + String(i+1)+ " " + "<a href=/player?magnet="+String(values[i].magnet)+"&id="+values[i].name +" target='_blank' rel='noopener' >"+ values[i].name + "</p>";
+            resultbox.innerHTML += each_line;
+
       }
+   }
+   else {
+      statbox.innerHTML = "Some Error Has Occured"
    }   
+}
 
    $(document).ready(function() {
      $("form").on('submit', function(event) {
+        document.getElementById("status").innerHTML = "Searching"
         event.preventDefault();
         $.ajax(
            {
@@ -108,12 +126,11 @@
                <svg viewBox="0 0 1024 1024"><path class="path1" d="M848.471 928l-263.059-263.059c-48.941 36.706-110.118 55.059-177.412 55.059-171.294 0-312-140.706-312-312s140.706-312 312-312c171.294 0 312 140.706 312 312 0 67.294-24.471 128.471-55.059 177.412l263.059 263.059-79.529 79.529zM189.623 408.078c0 121.364 97.091 218.455 218.455 218.455s218.455-97.091 218.455-218.455c0-121.364-103.159-218.455-218.455-218.455-121.364 0-218.455 97.091-218.455 218.455z"></path></svg>
             </button>
          </form>
-
-      <br/><br>
-<div class="result" id="result">
-
-
-</div>
-   </center>
+         <br/>
+         <div id="status"></div>
+         <br />
+         <div class="result" id="result"></div>
+      </center>
    </body>
-</html>
+
+   </html>
