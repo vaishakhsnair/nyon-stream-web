@@ -14,3 +14,9 @@ ON WINDOWS
  ON LINUX
   - Install node and webtorrent-cli globally
   - run web.py
+
+What Works ?
+  - Basic Playback and seeking works
+  - Multiple clients work (kinda)
+  
+ 
