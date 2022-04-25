@@ -185,9 +185,10 @@ def player_page():
 def testsubs():
     return render_template("subpars.html")
 
-@app.route("/subtitles/<filename>")
-def subs_home(filename):
-    return send_from_directory(directory="subtitles",filename=filename, as_attachment=True,path=f"subtitles/{filename}")
+@app.route(f"/subs/<path:flpath>")
+def returnsubs(flpath):
+    return send_file(flpath,as_attachment=True)
+
 
 
 if __name__ == "__main__":

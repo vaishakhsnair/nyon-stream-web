@@ -3,3 +3,5 @@ dependencies/
 __pycache__/
 tmp/
 temp/
+subtitles/
+temp_zips/

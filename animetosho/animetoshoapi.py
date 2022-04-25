@@ -5,15 +5,19 @@ import py7zr
 import re
 
 subs_path = "subtitles"
-temp = "temp"
+temp = "temp_zips"
 torrent_info_base = f"https://feed.animetosho.org/json?show=torrent&nyaa_id="
 torrent_info_base_2 = f"https://feed.animetosho.org/json?only_tor=1&q="
+basedir = "subtitles"
+default_lang = "eng"
 
 #https://animetosho.org/storage/attachpk/{primary_file_id}/{title.rstrip(".mkv")}_attachments.7z
 
-if not os.path.isdir(subs_path):
+try:
     os.mkdir(temp)
     os.mkdir(subs_path)
+except:
+    pass
 
 def get_subs(nyaa_id):
     req = requests.get(torrent_info_base+str(nyaa_id))
@@ -60,8 +64,28 @@ def download(attachment_link,nyaa_id):
         return dl_path
 
 
-print(get_subs(1419259))
 
-def unzip(src,dest):
-    with py7zr.SevenZipFile(src) as zipfile:
-        pass
+def unzip(src,nyaa_id,dest=subs_path):
+    print(src,nyaa_id)
+    
+    with py7zr.SevenZipFile(src) as f:
+        a = [i for i in f.getnames() if "track" and default_lang in i]
+        h = {}
+        for i in a:
+            n = i.split("/")
+            if len(n) > 1:
+                if n[0] not in h.keys():
+                    h[n[0]] = {}
+                if len(n) == 3:
+                    if n[1] not in h[n[0]].keys():
+                        h[n[0]][n[1]] = n[2]
+                else:
+                    h[n[0]].append(n[1])  
+            else:
+                h[nyaa] = i   
+                
+        f.extractall(f"{dest}/{nyaa_id}")            
+        return f"{dest}/{nyaa_id}",h
+
+
+print(unzip(get_subs(1419259),1419259))
