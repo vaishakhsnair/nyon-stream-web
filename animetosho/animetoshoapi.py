@@ -86,6 +86,3 @@ def unzip(src,nyaa_id,dest=subs_path):
                 
         f.extractall(f"{dest}/{nyaa_id}")            
         return f"{dest}/{nyaa_id}",h
-
-
-print(unzip(get_subs(1419259),1419259))
