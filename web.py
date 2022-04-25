@@ -29,7 +29,7 @@ import nyaa.nyaascraper as nyaa
 nyaa.node_path = os.path.join("dependencies","node.exe")
 nyaa.webtorrent_path = os.path.join("dependencies","webtorrent-cli","bin","cmd.js")
 
-webplayer_args = "--playlist --keep-seeding -o tmp/"
+webplayer_args = "--playlist --keep-seeding -o torrents/"
 if os.name=="posix":
     nyaa.node_path = ""
     nyaa.webtorrent_path = r"webtorrent"
