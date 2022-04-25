@@ -60,7 +60,7 @@ def download(attachment_link,nyaa_id):
         return dl_path
 
 
-print(get_subs(1509632))
+print(get_subs(1419259))
 
 def unzip(src,dest):
     with py7zr.SevenZipFile(src) as zipfile:

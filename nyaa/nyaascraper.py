@@ -64,10 +64,10 @@ def getTorrents(query: str) -> dict:
                 size = "[" + size.get_text() + "] "
             except:
                 size = ""
-
+            nyaa_id = int(links[0]['href'].split("/")[-1].replace(".torrent",""))
             magnet = unquote(links[1]['href'])
             name = row.find_all('a',text=True)[0].get_text()
-            torrents.append({"name": size + name, "magnet": magnet})
+            torrents.append({"name": size + name, "magnet": magnet,"nyaa_id":nyaa_id})
 
         if len(rows) == 0:
             break
