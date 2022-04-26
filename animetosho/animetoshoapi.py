@@ -11,8 +11,6 @@ torrent_info_base_2 = f"https://feed.animetosho.org/json?only_tor=1&q="
 basedir = "subtitles"
 default_lang = "eng"
 
-#https://animetosho.org/storage/attachpk/{primary_file_id}/{title.rstrip(".mkv")}_attachments.7z
-
 try:
     os.mkdir(temp)
     os.mkdir(subs_path)
