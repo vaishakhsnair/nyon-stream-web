@@ -26,8 +26,7 @@ from twisted.web.wsgi import WSGIResource
 import nyaa.nyaascraper as nyaa
 
 #import animetosho.animetoshoapi as tosho
-#Hello WOrld
-
+print("Nyon Stream Web Server")
 nyaa.node_path = os.path.join("dependencies","node.exe")
 nyaa.webtorrent_path = os.path.join("dependencies","webtorrent-cli","bin","cmd.js")
 
