@@ -1,8 +1,9 @@
 
 const uid = document.cookie.split("=")[1];
 const keepaliveinterval = 10;
-const params = new URLSearchParams(window.location.search);
-const magnet = params.get("magnet");
+const params = (window.location.search).split("magnet=")[1].split("&nyaaid=");
+const magnet = params[0];
+const nyaaid = params[1];
 var srcset = false;
 
 function socks(message) {
