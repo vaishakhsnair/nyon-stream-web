@@ -63,17 +63,21 @@
             font-family: 'Raleway', sans-serif;
             }
    </style>
+
+   <link href="https://vjs.zencdn.net/7.18.1/video-js.css" rel="stylesheet" />
    </head>
    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"> </script>
+   <script src="https://vjs.zencdn.net/7.5.5/video.js"></script>
    <script type="text/javascript" src=/static/player.js> </script>
+   <script type="text/javascript" src=/static/subtitles-octopus.js> </script>
+
 
 
    <body bgcolor="#121212">
       <p id="head">Nyon Stream</p>
       <div class="player">
       <center>
-         <video id = "player" width="1280" height="720" controls>
-            <source id="playersrc"  type="video/webm">
+         <video id = "player" width="1280" height="720" class="video-js" controls data-setup="{}">
          </video>
       </center>
    </div>

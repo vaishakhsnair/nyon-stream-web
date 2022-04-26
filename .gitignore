@@ -1,8 +1,6 @@
 dependencies/
 .history/
 __pycache__/
-tmp/
-temp/
 subtitles/
 temp_zips/
 torrents/

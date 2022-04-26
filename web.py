@@ -24,13 +24,14 @@ from twisted.web.server import Site
 from twisted.web.wsgi import WSGIResource
 
 import nyaa.nyaascraper as nyaa
+import animetosho.animetoshoapi as tosho
 
-#import animetosho.animetoshoapi as tosho
 print("Nyon Stream Web Server")
 nyaa.node_path = os.path.join("dependencies","node.exe")
 nyaa.webtorrent_path = os.path.join("dependencies","webtorrent-cli","bin","cmd.js")
 
 webplayer_args = "--playlist --keep-seeding -o torrents/"
+
 if os.name=="posix":
     nyaa.node_path = ""
     nyaa.webtorrent_path = r"webtorrent"
@@ -58,23 +59,27 @@ class socks(WebSocketServerProtocol):
                 print("Not scraped or scraping not completed")
                 threading.Thread(name=f'scrape-{payload["uid"]}', target=scrape,args=(payload,)).start()
                 self.sendMessage(json.dumps({"message":"Not Ready","uid":payload["uid"]}).encode(),isBinary)
+
+                if "nyaaid" in payload.keys():
+                    threading.Thread(name=f'subs-{payload["uid"]}',target=ready_subs,args=(payload,)).start()
+                    active[payload["uid"]]["subtitles"] = "running"
+
                 active[payload["uid"]]["scraped"] = "running"
 
-            elif active[payload["uid"]]["scraped"] == "running":
-                print("scraping not completed")
+            elif active[payload["uid"]]["scraped"] == "running" or active[payload["uid"]]["subtitles"] == "running":
+                print("scraping/Subs not completed")
 
             else:
                 print("Scrape completed")    
-                message = ["ready",active[payload["uid"]]["addr"],active[payload["uid"]]["port"]]    
+                message = ["ready",active[payload["uid"]]["addr"],active[payload["uid"]]["port"],active[payload["uid"]]["subtitles"]]    
                 print(message)    
                 self.sendMessage(json.dumps({"message":message[0],"uid":payload["uid"],
-                                "addr":message[1],"port":message[2]}).encode(),isBinary)
+                                "addr":message[1],"port":message[2],"subtitles":message[3]}).encode(),isBinary)
                 print("Changing Keepalive")
                 keepalivehistory[payload["uid"]] = datetime.datetime.now()
 
-            if "tosho_name" in payload.keys():
-                extract_path = tosho.get_subs(payload["tosho_name"])
-                tosho.serve_subs(payload["tosho_name"], extracted_path)
+
+                
                 
     def onClose(self, wasClean, code, reason):
         print(code,reason)
@@ -106,6 +111,11 @@ def scrape(payload):
     else:   
         return ["ready",active[uid]["addr"],active[uid]["port"]]
 
+def ready_subs(payload):
+    global active
+    extract_path = tosho.get_subs(int(payload["nyaaid"]))
+    active[payload["uid"]]["subtitles"]=extract_path
+    print(active[payload["uid"]]["subtitles"])
 
 def keepalivecheck():
     time.sleep(15)
@@ -148,7 +158,7 @@ def player(uid,magnet):
 
     print("Command :",f"{nyaa.node_path} {nyaa.webtorrent_path} \"{magnet}\" {webplayer_args} -p {port}")
     process = subprocess.Popen(f"{nyaa.node_path} {nyaa.webtorrent_path} \"{magnet}\" {webplayer_args} -p {port}",shell=True, stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
-    active[uid] = {"port":port,"magnet":magnet,"process":process,"scraped":"Not Started"}
+    active[uid] = {"port":port,"magnet":magnet,"process":process,"scraped":"Not Started","subtitles":"Not Started"}
     print(active[uid])
         
 

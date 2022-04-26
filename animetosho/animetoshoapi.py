@@ -17,7 +17,7 @@ try:
 except:
     pass
 
-def get_subs(nyaa_id):
+def subsdl(nyaa_id):
     req = requests.get(torrent_info_base+str(nyaa_id))
     req_json = json.loads(req.content)
     #print(req_json)
@@ -80,7 +80,10 @@ def unzip(src,nyaa_id,dest=subs_path):
                 else:
                     h[n[0]].append(n[1])  
             else:
-                h[nyaa] = i   
+                h[str(nyaa_id)] = i   
                 
         f.extractall(f"{dest}/{nyaa_id}")            
         return f"{dest}/{nyaa_id}",h
+
+def get_subs(nyaa_id):
+    return unzip(subsdl(nyaa_id),nyaa_id)
