@@ -83,10 +83,8 @@
          statbox.innerHTML = response.message+",Found "+values.length+" results.";
          var resultbox = document.getElementById("result");
          resultbox.innerHTML = "";
-         
-
          for(let i=0; i< values.length; i++){
-            var each_line = "<p>" + String(i+1) + ` <a href='/player?magnet=${String(values[i].magnet)}&nyaaid=${values[i].nyaa_id}' target='_blank' rel='noopener' >`+ values[i].name + "</p>";
+            var each_line = "<p>" + String(i+1) + `<a href='/player?magnet=${String(values[i].magnet).replace('"','\"')}&nyaaid=${values[i].nyaa_id}' target='_blank' rel='noopener' >`+ values[i].name + "</p>";
             resultbox.innerHTML += each_line;
 
       }

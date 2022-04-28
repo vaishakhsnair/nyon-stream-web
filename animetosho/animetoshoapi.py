@@ -65,6 +65,8 @@ def download(attachment_link,nyaa_id):
 
 def unzip(src,nyaa_id,dest=subs_path):
     print(src,nyaa_id)
+    if src == -1:
+        return -1
     
     with py7zr.SevenZipFile(src) as f:
         a = [i for i in f.getnames() if "track" and default_lang in i]
@@ -78,7 +80,7 @@ def unzip(src,nyaa_id,dest=subs_path):
                     if n[1] not in h[n[0]].keys():
                         h[n[0]][n[1]] = n[2]
                 else:
-                    h[n[0]].append(n[1])  
+                    h[n[0]] = n[1]
             else:
                 h[str(nyaa_id)] = i   
                 

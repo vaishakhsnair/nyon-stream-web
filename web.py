@@ -114,7 +114,10 @@ def scrape(payload):
 def ready_subs(payload):
     global active
     extract_path = tosho.get_subs(int(payload["nyaaid"]))
-    active[payload["uid"]]["subtitles"]=extract_path
+    if extract_path == -1:
+        active[payload["uid"]]["subtitles"] = "Not Available"
+    else:
+        active[payload["uid"]]["subtitles"]=extract_path
     print(active[payload["uid"]]["subtitles"])
 
 def keepalivecheck():

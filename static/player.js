@@ -47,6 +47,10 @@ window.addEventListener('load',function(){
 
 
 function subsload(subs,index){
+   if (subs === "Not Available"){
+      console.log("Subtitles not available. Not loading subtitleoctopus")
+      return null
+   }
    console.log(subs,index,)
    var player = videojs("#player");
    for (var tracks in subs[1]){
