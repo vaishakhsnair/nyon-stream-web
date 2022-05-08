@@ -1,5 +1,5 @@
 # nyon-stream-web (WIP)
-A web App For Nyon Stream 
+A Web-App to play anime from nyaa si using webtorrent
 
 Made using a fork of [Nyon-Stream](https://github.com/Nixuge/nyon-stream)
 
