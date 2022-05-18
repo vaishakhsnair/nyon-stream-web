@@ -20,7 +20,7 @@ except:
 def subsdl(nyaa_id):
     req = requests.get(torrent_info_base+str(nyaa_id))
     req_json = json.loads(req.content)
-    #print(req_json)
+    print(req_json)
     if "error" not in req_json.keys():
         title = req_json["title"]
         torrent_name = req_json["torrent_name"]
@@ -50,6 +50,8 @@ def subsdl(nyaa_id):
             attachment_link = f"https://animetosho.org/storage/attachpk/{primary_file_id}/{title.rstrip('.mkv')}_attachments.7z"
             
         return download(attachment_link,nyaa_id)
+    else:
+        return -1
 
 def download(attachment_link,nyaa_id):
     req_dl = requests.get(attachment_link,stream=True)

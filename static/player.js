@@ -25,7 +25,6 @@ window.addEventListener('load',function(){
       ws.onopen = function() {
          console.log("Connected to Server");
          socks("started");
-         socks("keepalive");
       }
 
       ws.onclose = function(e) {
@@ -60,7 +59,7 @@ function subsload(subs,index){
       var subdir = subsarray[index];
       var track = subs[1][subdir];
    }
-   var url = '/subs/subtitles/'+subdir+"/"+track
+   var url = '/subs/'+subdir+"/"+track
    console.log(url)
 
    player.ready(function () {

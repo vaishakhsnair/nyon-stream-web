@@ -21,16 +21,17 @@ def pythondependencies():
             __import__(i)
 
 
-def webtorrent_stuff():    
-    if os.name == "nt":
-        node_dl_link = "https://nodejs.org/download/release/latest/win-x64/node.exe"
-        if "node.exe" not in os.listdir(dependecies_folder):
-            downloader(node_dl_link,"node.exe")
-        node_path = os.path.join(os.getcwd(),dependecies_folder,"node.exe")
+def webtorrent_stuff(check=True,node_path=None):
+    if check:
+        if os.name == "nt":
+            node_dl_link = "https://nodejs.org/download/release/latest/win-x64/node.exe"
+            if "node.exe" not in os.listdir(dependecies_folder):
+                downloader(node_dl_link,"node.exe")
+            node_path = os.path.join(os.getcwd(),dependecies_folder,"node.exe")
 
-    else:
-        print("The Current os is not windows. if you are running linux install node and npm using your package manager and use 'npm i webtorrent-cli -g' to install webtorrent")
-        return None
+        else:
+            print("The Current os is not windows. if you are running linux install node and npm using your package manager and use 'npm i webtorrent-cli -g' to install webtorrent")
+            return None
 
     webtorrent_link = f'https://github.com/webtorrent/webtorrent-cli/archive/refs/tags/{requests.get("https://api.github.com/repos/webtorrent/webtorrent-cli/releases/latest").json()["tag_name"]}.zip'
     print(webtorrent_link)
@@ -43,8 +44,8 @@ def webtorrent_stuff():
         for i in os.listdir(dependecies_folder):
             if "webtorrent-cli" in i:
                 print(i)
-                os.rename(os.path.join(dependecies_folder,i),os.path.join(dependecies_folder,"webtorrent-cli"))
-                webtorrent_path = os.path.join(os.getcwd(),dependecies_folder,"webtorrent-cli")     #renaming for consistency
+                os.rename(os.path.join(dependecies_folder,i),os.path.join(dependecies_folder,"webtorrent-cli")) #renaming for consistency
+        webtorrent_path = os.path.join(os.getcwd(),dependecies_folder,"webtorrent-cli")
     
     npm_link = "https://nodejs.org/dist/npm/npm-1.4.9.zip"
     downloader(npm_link, "npm.zip")
@@ -76,4 +77,9 @@ pythondependencies()
 import requests
 from zipfile import ZipFile
 
-webtorrent_stuff()
+args = sys.argv
+if '--nocheck' and '--node' in args:
+
+    webtorrent_stuff(check=False,node_path=args[args.index('--node')+1])
+else:
+    webtorrent_stuff()

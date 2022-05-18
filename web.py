@@ -78,13 +78,19 @@ class socks(WebSocketServerProtocol):
                 print("Changing Keepalive")
                 keepalivehistory[payload["uid"]] = datetime.datetime.now()
 
-
-                
-                
     def onClose(self, wasClean, code, reason):
         print(code,reason)
         if "kill" not in [i.name for i in threading.enumerate()]:
             threading.Thread(name="kill",target=keepalivecheck).start()
+
+
+class statsocks(WebSocketServerProtocol):
+    def onConnect(self, request):
+        print("Client connect",request.peer)
+    
+    
+
+
 
 def scrape(payload):
     global active
@@ -101,6 +107,10 @@ def scrape(payload):
                 resp = requests.get(f"http://localhost:{port}")
             except:
                 pass
+
+            if uid not in keepalivehistory.keys():          #avoid zombie mode if the main process is terminated before this thread
+                return None
+
         soup =  bs(resp.text, 'html.parser')
         li = soup.find_all("a",href=True)
         li = [i["href"] for i in li]
@@ -159,8 +169,8 @@ def player(uid,magnet):
     else:
         active[uid]["process"].kill()
 
-    print("Command :",f"{nyaa.node_path} {nyaa.webtorrent_path} \"{magnet}\" {webplayer_args} -p {port}")
-    process = subprocess.Popen(f"{nyaa.node_path} {nyaa.webtorrent_path} \"{magnet}\" {webplayer_args} -p {port}",shell=True, stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
+    #print("Command :",f"{nyaa.node_path} {nyaa.webtorrent_path} \"{magnet}\" {webplayer_args} -p {port}")
+    process = subprocess.Popen(f"{nyaa.node_path} {nyaa.webtorrent_path} \"{magnet}\" {webplayer_args} -p {port}",shell=True, stdout=subprocess.PIPE,stderr=subprocess.STDOUT,bufsize=0)
     active[uid] = {"port":port,"magnet":magnet,"process":process,"scraped":"Not Started","subtitles":"Not Started"}
     print(active[uid])
         
@@ -201,10 +211,15 @@ def testsubs():
 
 @app.route(f"/subs/<path:flpath>")
 def returnsubs(flpath):
-    return send_file(flpath,as_attachment=True)
+    safe_path = safe_join("subtitles",flpath)
+    if safe_path == "NotFound":
+        return "The requested file is not found"
+    return send_file(safe_path,as_attachment=True)
 
-
-
+@app.route(f"/stats")
+def webtorrstats():
+    uid = request.cookies.get("uid")
+    
 if __name__ == "__main__":
 
     log.startLogging(sys.stdout)
@@ -214,12 +229,16 @@ if __name__ == "__main__":
     wsFactory.protocol = socks
     wsResource = WebSocketResource(wsFactory)
 
+    wsFactoryStats = WebSocketServerFactory("ws://0.0.0.0:8070")
+    wsFactoryStats.protocol = statsocks
+    wsResourceStats = WebSocketResource(wsFactoryStats)
+
     # create a Twisted Web WSGI resource for our Flask server
     wsgiResource = WSGIResource(reactor, reactor.getThreadPool(), app)
 
     # create a root resource serving everything via WSGI/Flask, but
     # the path "/ws" served by our WebSocket stuff
-    rootResource = WSGIRootResource(wsgiResource, {b'ws': wsResource})
+    rootResource = WSGIRootResource(wsgiResource, {b'ws': wsResource,b'wstat': wsResourceStats})
 
     # create a Twisted Web Site and run everything
     site = Site(rootResource)
