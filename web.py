@@ -108,8 +108,9 @@ def scrape(payload):
             except:
                 pass
 
-            if uid not in keepalivehistory.keys():          #avoid zombie mode if the main process is terminated before this thread
-                return None
+            if uid not in keepalivehistory.keys():     
+                print("UID Not Found Cancelling scrape")     #avoid zombie mode if the main process is terminated before this thread
+                #return None
 
         soup =  bs(resp.text, 'html.parser')
         li = soup.find_all("a",href=True)
@@ -170,7 +171,9 @@ def player(uid,magnet):
         active[uid]["process"].kill()
 
     #print("Command :",f"{nyaa.node_path} {nyaa.webtorrent_path} \"{magnet}\" {webplayer_args} -p {port}")
-    process = subprocess.Popen(f"{nyaa.node_path} {nyaa.webtorrent_path} \"{magnet}\" {webplayer_args} -p {port}",shell=True, stdout=subprocess.PIPE,stderr=subprocess.STDOUT,bufsize=0)
+    process = subprocess.Popen(f"{nyaa.node_path} {nyaa.webtorrent_path} \"{magnet}\" {webplayer_args} -p {port}",shell=True
+                                ,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,bufsize=0)
+
     active[uid] = {"port":port,"magnet":magnet,"process":process,"scraped":"Not Started","subtitles":"Not Started"}
     print(active[uid])
         
@@ -219,7 +222,14 @@ def returnsubs(flpath):
 @app.route(f"/stats")
 def webtorrstats():
     uid = request.cookies.get("uid")
-    
+    print(uid)
+    if uid in active.keys():
+        a = active[uid]
+        return json.dumps({"port":a["port"],"magnet":a["magnet"],"scraped":a["scraped"],"subtitles":a["subtitles"]})
+
+    else:
+        return json.dumps({"Message":"Not Found"})
+
 if __name__ == "__main__":
 
     log.startLogging(sys.stdout)
