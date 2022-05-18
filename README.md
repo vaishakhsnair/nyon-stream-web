@@ -1,14 +1,12 @@
 # nyon-stream-web (WIP)
-A web App For Nyon Stream 
+A Web-App to play anime from nyaa si using webtorrent
 
-Made using a fork of https://github.com/Nixuge/nyon-stream
+Made using a fork of [Nyon-Stream](https://github.com/Nixuge/nyon-stream)
 
-uses python and native browser js 
-
-
+uses python and native browser js or browserified nodejs packages
 
 ON WINDOWS
-  - install Node and webtorrent-cli or use the dependencies from the latest release of https://github.com/vaishakhsnair/nyon-stream 
+  - run the dependency-installer.py to install the required stuff
   - change the paths for node and webtorrent (if applicable) and run web.py
   
  ON LINUX
@@ -17,6 +15,7 @@ ON WINDOWS
 
 What Works ?
   - Basic Playback and seeking works
-  - Multiple clients work (kinda)
+  - Subtitles work for most of the anime in nyaa, bulk volumes don't work properly yet (have to figure out a way to identify them)
+  - Multiple clients
   
  
