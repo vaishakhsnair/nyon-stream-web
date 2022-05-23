@@ -72,14 +72,15 @@ def downloader(link,filename):
                 if chunk:
                     file.write(chunk)
 
-pythondependencies()
 
-import requests
-from zipfile import ZipFile
 
-args = sys.argv
-if '--nocheck' and '--node' in args:
+if __name__ == "__main__":
+    pythondependencies()
+    import requests
+    from zipfile import ZipFile
 
-    webtorrent_stuff(check=False,node_path=args[args.index('--node')+1])
-else:
-    webtorrent_stuff()
+    args = sys.argv
+    if '--nocheck' and '--node' in args:
+        webtorrent_stuff(check=False,node_path=args[args.index('--node')+1])
+    else:
+        webtorrent_stuff()
