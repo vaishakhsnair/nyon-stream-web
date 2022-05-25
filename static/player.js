@@ -6,6 +6,8 @@ const magnet = params[0];
 const nyaaid = params[1];
 var srcset = false;
 var subsarray = [];
+var statspace = null
+
 
 function socks(message) {
    var blob = JSON.stringify({"message":message,"uid":uid,"magnet":magnet,"nyaaid":nyaaid})
@@ -21,6 +23,7 @@ function socks(message) {
 
 window.addEventListener('load',function(){
    ws = new WebSocket("ws://"+window.location.hostname+":8080/ws");
+   statspace = document.getElementById("stats");
    if (ws) {
       ws.onopen = function() {
          console.log("Connected to Server");
@@ -42,6 +45,21 @@ window.addEventListener('load',function(){
         }
 
    }
+   wstat = new WebSocket("ws://"+window.location.hostname+":8080/wstat");
+   if (wstat){
+       wstat.onopen = function(){
+           console.log("Statistics server loaded");
+           wstat.send(uid)
+       }
+       wstat.onmessage = function(event){
+          statsdisplay(event.data) 
+       }
+       wstat.onclose = function(e){
+           console.log("Connection closed (wasClean = " + e.wasClean + ", code = " + e.code + ", reason = '" + e.reason + "')");
+       }
+   }
+
+   
 })
 
 
@@ -99,6 +117,14 @@ function setplayer(addr,subtitles,currindex) {
    }
 
 }
+
+function statsdisplay(data){
+   statspace.innerHTML = data
+   console.log(data);
+
+   }
+
+   
 
 
 

@@ -9,8 +9,10 @@ import threading
 import time
 import uuid
 import os
-
+import contextlib
 import requests
+
+from autobahn import exception
 from autobahn.twisted.resource import WebSocketResource, WSGIRootResource
 from autobahn.twisted.websocket import (WebSocketServerFactory,
                                         WebSocketServerProtocol)
@@ -76,11 +78,51 @@ class socks(WebSocketServerProtocol):
             threading.Thread(name="kill",target=services.keepalivecheck).start()
 
 
+# Websocket Server Protocol for stats unbuffered output streaming
 class statsocks(WebSocketServerProtocol):
     def onConnect(self, request):
         print("Client connect",request.peer)
+
+    def onMessage(self, payload, isBinary):
+        print(payload,type(payload))
+        uid = payload.decode()
+        if uid in services.active.keys():
+            threading.Thread(name=f"stats-{uid}",target=download_monitor,args=(self,uid,isBinary)).start() #threading to avoid blocking
+        else:
+             self.sendMessage(payload, isBinary)
+    def onClose(self, wasClean, code, reason):
+        print("Stats Monitor disconnected")
     
-    
+def download_monitor(self,uid,isBinary): #threads the unbuffered stdout to avoid blocking
+    print(f"started stats monitoring for {uid}")
+
+    while True:
+        if "process" in services.active[uid].keys():
+            break
+
+    for l in unbuffered(services.active[uid]["process"]):
+        try:
+            self.sendMessage(l, isBinary) 
+        except exception.Disconnected:
+            print(f"Stats Monitor for {uid} killed")
+            return None
+    print(f"Stats Monitoring for {uid} ended") 
+
+def unbuffered(proc, stream='stdout'):
+    stream = getattr(proc, stream)
+    with contextlib.closing(stream):
+        while True:
+            try:
+                last = stream.read(500) # read up to 80 chars
+            except ValueError:
+                return None
+            # stop when end of stream reached
+            if not last:
+                if proc.poll() is not None:
+                    break
+            else:
+                yield last
+
 # Our WSGI application .. in this case Flask based
 app = Flask(__name__)
 app.secret_key = str(uuid.uuid4())
@@ -126,9 +168,8 @@ def webtorrstats():
     uid = request.cookies.get("uid")
     print(uid)
     if uid in services.active.keys():
-        a = services.active[uid]
-        return json.dumps({"port":a["port"],"magnet":a["magnet"],"scraped":a["scraped"],"subtitles":a["subtitles"]})
-
+        return render_template("stats.html")
+       
     else:
         return json.dumps({"Message":"Not Found"})
 

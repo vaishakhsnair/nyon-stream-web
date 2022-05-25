@@ -13,43 +13,6 @@
             font-family: 'Raleway', sans-serif;
 
          }
-      .searchbar
-      {
-         display:block;
-         align-content: center;
-         width: 100%;
-
-      }
-      form 
-      {
-            background-color: #3b3b3b;
-            width: 300px;
-            height: 44px;
-            border-radius: 5px;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-      }
-      input {
-      all: unset;
-      font: 16px system-ui;
-      color: #fff;
-      height: 100%;
-      width: 100%;
-      padding: 6px 10px;
-      align-content: center;
-      }
-      ::placeholder {
-      color: #fff;
-      opacity: 0.7; 
-      }
-      button {
-      all: unset;
-      cursor: pointer;
-      width: 44px;
-      height: 44px;
-      }
-
       svg {
       color: #fff;
       fill: currentColor;
@@ -57,11 +20,12 @@
       height: 24px;
       padding: 10px;
       }
-      .result {
-            color: #697477;
-            text-align: center;
+      .stats
+         {
+            color:#697477;
             font-family: 'Raleway', sans-serif;
-            }
+
+         }
    </style>
 
    <link href="https://vjs.zencdn.net/7.18.1/video-js.css" rel="stylesheet" />
@@ -80,8 +44,11 @@
          <video id = "player" width="1280" height="720" class="video-js" controls data-setup="{}">
          </video>
          <br>
+         <br>
+         <pre class="stats" id="stats" style="height: 20em;overflow-y:scroll;" ></pre><br><br><br>
       </center>
    </div>
+   
    
    </body>
 </html>
