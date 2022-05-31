@@ -23,7 +23,6 @@ function socks(message) {
 
 window.addEventListener('load',function(){
    ws = new WebSocket("ws://"+window.location.hostname+":8080/ws");
-   statspace = document.getElementById("stats");
    if (ws) {
       ws.onopen = function() {
          console.log("Connected to Server");
@@ -45,10 +44,13 @@ window.addEventListener('load',function(){
         }
 
    }
+
+
+   statspace = document.getElementById("stats");
    wstat = new WebSocket("ws://"+window.location.hostname+":8080/wstat");
    if (wstat){
        wstat.onopen = function(){
-           console.log("Statistics server loaded");
+           console.log("Status server loaded");
            wstat.send(uid)
        }
        wstat.onmessage = function(event){
@@ -118,9 +120,17 @@ function setplayer(addr,subtitles,currindex) {
 
 }
 
+var clear = false;
 function statsdisplay(data){
-   statspace.innerHTML = data
-   console.log(data);
+   if (clear){
+      statspace.innerHTML = "";
+      clear = false;
+   }
+   if (data.includes("more")){
+      clear = true;
+   }
+   statspace.innerHTML += data + '\n';
+   statspace.scrollTop = statspace.scrollHeight;
 
    }
 
