@@ -39,44 +39,13 @@ class socks(WebSocketServerProtocol):
         print("Client connect",request.peer)
 
     def onMessage(self, payload, isBinary):
-        self.sendMessage(payload, isBinary)
-        payload = json.loads(payload.decode("utf-8"))        
-        #print(payload)
-
-        if payload["message"] == "started":
-            services.player(uid=payload["uid"],magnet = payload["magnet"],configs=configs,webplayer_args=webplayer_args)
-        
-        if payload["message"] == "keepalive":
-            print(services.active[payload["uid"]].keys(),[i.name for i in threading.enumerate()],f'scrape-{payload["uid"]}',sep="\n")
-
-            if  services.active[payload["uid"]]["scraped"] == "Not Started":
-                print("Not scraped or scraping not completed")
-                threading.Thread(name=f'scrape-{payload["uid"]}', target=services.scrape,args=(payload,)).start()
-                self.sendMessage(json.dumps({"message":"Not Ready","uid":payload["uid"]}).encode(),isBinary)
-
-                if "nyaaid" in payload.keys():
-                    threading.Thread(name=f'subs-{payload["uid"]}',target=services.ready_subs,args=(payload,)).start()
-                    services.active[payload["uid"]]["subtitles"] = "running"
-
-                services.active[payload["uid"]]["scraped"] = "running"
-
-            elif services.active[payload["uid"]]["scraped"] == "running" or services.active[payload["uid"]]["subtitles"] == "running":
-                print("scraping/Subs not completed")
-
-            else:
-                print("Scrape completed")    
-                message = ["ready",services.active[payload["uid"]]["addr"],services.active[payload["uid"]]["port"],services.active[payload["uid"]]["subtitles"]]    
-                print(message)    
-                self.sendMessage(json.dumps({"message":message[0],"uid":payload["uid"],
-                                "addr":message[1],"port":message[2],"subtitles":message[3]}).encode(),isBinary)
-                print("Changing Keepalive")
-                services.keepalivehistory[payload["uid"]] = datetime.datetime.now()
+        if "Websocket-Handler" not in [i.name for i in threading.enumerate()]:
+            threading.Thread(name = "Websocket-Handler",target = websocket_message_handler, args= (self,payload,isBinary,)).start()
 
     def onClose(self, wasClean, code, reason):
         print(code,reason)
         if "kill" not in [i.name for i in threading.enumerate()]:
             threading.Thread(name="kill",target=services.keepalivecheck).start()
-
 
 # Websocket Server Protocol for stats unbuffered output streaming
 class statsocks(WebSocketServerProtocol):
@@ -93,13 +62,63 @@ class statsocks(WebSocketServerProtocol):
     def onClose(self, wasClean, code, reason):
         print("Stats Monitor disconnected")
     
+
+
+#Main Websocket Listener Activity Handler Function 
+def websocket_message_handler(self,payload,isBinary):
+    payload = json.loads(payload.decode("utf-8"))        
+
+    if payload["message"] == "started":
+        services.player(uid=payload["uid"],magnet = payload["magnet"],configs=configs,webplayer_args=webplayer_args)
+        message_to_send = json.dumps(payload).encode()
+
+    
+    elif payload["message"] == "keepalive":
+        scrape_status = services.active[payload["uid"]]["scraped"]
+        subtitle_status = services.active[payload["uid"]]["subtitles"]
+
+        if  scrape_status == "Not Started":
+            print("Not scraped or scraping not completed")
+            threading.Thread(name=f'scrape-{payload["uid"]}', target=services.scrape,args=(payload,)).start()
+            
+            if "nyaaid" in payload.keys():
+                threading.Thread(name=f'subtitles-{payload["uid"]}',target=services.ready_subs,args=(payload,)).start()
+                subtitle_status = "running"
+
+            scrape_status = "running"
+            message_to_send = json.dumps({"message":"Not Ready","uid":payload["uid"]}).encode()
+
+        elif scrape_status == "running" or subtitle_status == "running":
+            print("scraping/Subs not completed")
+            message_to_send = json.dumps({"message":"Not Ready","uid":payload["uid"]}).encode()
+
+        else:
+            print("Scrape completed")    
+            message = ["ready",services.active[payload["uid"]]["addr"],
+                        services.active[payload["uid"]]["port"],
+                        services.active[payload["uid"]]["subtitles"]]    
+
+            message_to_send = json.dumps({"message":message[0],"uid":payload["uid"],
+                                        "addr":message[1],"port":message[2],
+                                        "subtitles":message[3]}).encode()
+
+        try:
+            self.sendMessage(message_to_send,isBinary)
+            services.keepalivehistory[payload["uid"]] = datetime.datetime.now() #Changes last keepalive message timestamp
+
+        except exception.Disconnected:
+            print(f"User with {payload['uid']} has Disconnected")
+
+
 def download_monitor(self,uid,isBinary): #threads the unbuffered stdout to avoid blocking
     print(f"started stats monitoring for {uid}")
 
+    #Start reading stdout only after process has started
     while True:
-        if "process" in services.active[uid].keys():
+        if "process" in services.active[uid].keys():    
             break
 
+    #Reading stdout
     for l in unbuffered(services.active[uid]["process"]):
         try:
             self.sendMessage(l, isBinary) 
@@ -108,12 +127,13 @@ def download_monitor(self,uid,isBinary): #threads the unbuffered stdout to avoid
             return None
     print(f"Stats Monitoring for {uid} ended") 
 
+
 def unbuffered(proc, stream='stdout'):
     stream = getattr(proc, stream)
     with contextlib.closing(stream):
         while True:
             try:
-                last = stream.read(500) # read up to 80 chars
+                last = stream.read(1024) # read up to 1024 chars
             except ValueError:
                 return None
             # stop when end of stream reached
@@ -173,6 +193,7 @@ def webtorrstats():
     else:
         return json.dumps({"Message":"Not Found"})
 
+
 if __name__ == "__main__":
 
     with open("config.json","r") as configfile:
@@ -182,8 +203,10 @@ if __name__ == "__main__":
 
     if os.name == "posix":
         configs = configs["linux"]
+        configs["shell"] = True
     else:
         configs = configs["windows"]
+        configs["shell"] = False
     
     print("Current Config :",configs)
 
@@ -211,4 +234,7 @@ if __name__ == "__main__":
     site = Site(rootResource)
 
     reactor.listenTCP(8080, site)
+    print("Starting Nyon Stream Server Backend")
+    print("Fix Multithreaded Queing or you're Call Stacks Gonna Tank")
     reactor.run()
+      

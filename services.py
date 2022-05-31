@@ -99,7 +99,7 @@ def player(uid,magnet,configs,webplayer_args):
         active[uid]["process"].kill()
 
     #print("Command :",f"{configs['node_path']} {configs['webtorrent_path']} \"{magnet}\" {webplayer_args} -p {port}")
-    process = subprocess.Popen(f"{configs['node_path']} {configs['webtorrent_path']} \"{magnet}\" {webplayer_args} -p {port}",shell=True
+    process = subprocess.Popen(f"{configs['node_path']} {configs['webtorrent_path']} \"{magnet}\" {webplayer_args} -p {port}",shell=configs["shell"]
                                 ,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,bufsize=0)
 
     active[uid] = {"port":port,"magnet":magnet,"process":process,"scraped":"Not Started","subtitles":"Not Started"}
