@@ -235,6 +235,5 @@ if __name__ == "__main__":
 
     reactor.listenTCP(8080, site)
     print("Starting Nyon Stream Server Backend")
-    print("Fix Multithreaded Queing or you're Call Stacks Gonna Tank")
     reactor.run()
       
