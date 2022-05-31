@@ -119,7 +119,7 @@ def download_monitor(self,uid,isBinary): #threads the unbuffered stdout to avoid
             break
 
     #Reading stdout
-    for l in unbuffered(services.active[uid]["process"]):
+    for l in unbuffered_process_stdout(services.active[uid]["process"]):
         try:
             self.sendMessage(l, isBinary) 
         except exception.Disconnected:
@@ -128,7 +128,7 @@ def download_monitor(self,uid,isBinary): #threads the unbuffered stdout to avoid
     print(f"Stats Monitoring for {uid} ended") 
 
 
-def unbuffered(proc, stream='stdout'):
+def unbuffered_process_stdout(proc, stream='stdout'):
     stream = getattr(proc, stream)
     with contextlib.closing(stream):
         while True:
