@@ -26,6 +26,27 @@ from twisted.python import log
 from twisted.web.server import Site
 from twisted.web.wsgi import WSGIResource
 
+
+if not os.path.isfile("config.json"):
+    default_stuff = '''
+    {
+        "windows": 
+                {
+                    "node_path": "dependencies/node.exe", 
+                    "webtorrent_path": "dependencies/webtorrent-cli/bin/cmd.js"
+                }, 
+        "linux": 
+                {
+                    "node_path": "", 
+                    "webtorrent_path": "webtorrent"
+                }, 
+        "webtorrent-arguments": "--playlist --keep-seeding -o torrents/"
+    }'''
+    
+    with open("config.json","w") as file:
+        file.write(default_stuff)
+
+
 #Background service modules
 import services
 
@@ -191,7 +212,7 @@ def webtorrstats():
         return render_template("stats.html")
        
     else:
-        return json.dumps({"Message":"Not Found"})
+        return jsonify(message="not found")
 
 
 if __name__ == "__main__":

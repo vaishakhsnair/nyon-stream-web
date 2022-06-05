@@ -1,13 +1,14 @@
-{
-    "windows": 
-        {
-            "node_path": "dependencies/node.exe", 
-            "webtorrent_path": "dependencies/webtorrent-cli/bin/cmd.js"
-        }, 
-    "linux": 
-        {
-            "node_path": "", 
-            "webtorrent_path": "webtorrent"
-        }, 
-    "webtorrent-arguments": "--playlist --keep-seeding -o torrents/"
-}
+
+    {
+        "windows": 
+                {
+                    "node_path": "dependencies/node.exe", 
+                    "webtorrent_path": "dependencies/webtorrent-cli/bin/cmd.js"
+                }, 
+        "linux": 
+                {
+                    "node_path": "", 
+                    "webtorrent_path": "webtorrent"
+                }, 
+        "webtorrent-arguments": "--playlist --keep-seeding -o torrents/"
+    }

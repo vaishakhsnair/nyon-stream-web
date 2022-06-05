@@ -135,7 +135,21 @@ function statsdisplay(data){
    }
 
    
+function showstats(){
+   statpre = document.getElementById("stats")
+   playerspace = document.getElementsByClassName("player")
+   if (statpre.style.display === "none") {
+      console.log("Showing raw logs")
+      statpre.style.display = "block";
+      statpre.scrollIntoView()
 
+    } 
+   else {
+      console.log("Hiding raw logs")
+      statpre.style.display = "none";
+      playerspace.scrollIntoView()
+    }
+}
 
 
 keepalivetimer = setInterval(function() {

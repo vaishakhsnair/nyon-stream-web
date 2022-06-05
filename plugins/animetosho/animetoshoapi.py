@@ -69,7 +69,13 @@ def unzip(src,nyaa_id,dest=subs_path):
     print(src,nyaa_id)
     if src == -1:
         return -1
-    
+    if os.path.isdir(f"{dest}/{nyaa_id}") and os.path.isfile(f"{dest}/{nyaa_id}/filemap.json"):
+        print(f"filemap for the id {nyaa_id} already exists,using it..")
+        with open(f"{dest}/{nyaa_id}/filemap.json") as jsonfile:
+            filemap = json.load(jsonfile)
+        return (f"{dest}/{nyaa_id}",filemap)
+
+
     with py7zr.SevenZipFile(src) as f:
         a = [i for i in f.getnames() if "track" and default_lang in i]
         h = {}
@@ -85,9 +91,15 @@ def unzip(src,nyaa_id,dest=subs_path):
                     h[n[0]] = n[1]
             else:
                 h[str(nyaa_id)] = i   
-                
-        f.extractall(f"{dest}/{nyaa_id}")            
-        return f"{dest}/{nyaa_id}",h
+    
+        f.extractall(f"{dest}/{nyaa_id}") 
+
+    with open(f"{dest}/{nyaa_id}/filemap.json","a+") as jsonfile:
+        print(f"Creating filemap for the id {nyaa_id}")
+        json.dump(h,jsonfile)
+
+          
+    return (f"{dest}/{nyaa_id}",h)
 
 def get_subs(nyaa_id):
     return unzip(subsdl(nyaa_id),nyaa_id)
