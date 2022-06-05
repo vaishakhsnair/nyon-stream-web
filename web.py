@@ -93,7 +93,7 @@ def websocket_message_handler(self,payload,isBinary):
             message_to_send = json.dumps({"message":"Not Ready","uid":payload["uid"]}).encode()
 
         else:
-            print("Scrape completed")    
+            print(f"keepalive from client: {payload['uid']}")    
             message = ["ready",services.active[payload["uid"]]["addr"],
                         services.active[payload["uid"]]["port"],
                         services.active[payload["uid"]]["subtitles"]]    
