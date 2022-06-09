@@ -1,9 +1,9 @@
 
-# Nyon-Stream-Web
-
+# Nyon-Stream-Web 
 An Anime torrent streamer using python and webtorrent-cli
 
-
+## WORK IN PROGRESS
+There will be bugs that are yet to be fixed so do put up an issue if you find one
 
 ## Acknowledgements
 
