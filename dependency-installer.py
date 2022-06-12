@@ -12,7 +12,7 @@ if not os.path.isdir(dependecies_folder):
 
 
 def pythondependencies():
-    dependency_list = ["requests","bs4","py7zr","uuid","autobahn","werkzeug","flask","twisted","tqdm"]
+    dependency_list = ["requests","bs4","uuid","autobahn","werkzeug","flask","twisted","tqdm","py7zr"]
     for i in dependency_list:
         try:
             __import__(i)  #to check if package is installed

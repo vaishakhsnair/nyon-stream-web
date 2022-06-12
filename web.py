@@ -62,11 +62,16 @@ class socks(WebSocketServerProtocol):
     def onMessage(self, payload, isBinary):
         if "Websocket-Handler" not in [i.name for i in threading.enumerate()]:
             threading.Thread(name = "Websocket-Handler",target = websocket_message_handler, args= (self,payload,isBinary,)).start()
+            #running in different thread to avoid blocking
 
     def onClose(self, wasClean, code, reason):
+        print("Client Disconnected")
         print(code,reason)
+
         if "kill" not in [i.name for i in threading.enumerate()]:
             threading.Thread(name="kill",target=services.keepalivecheck).start()
+            #creates  a thread to kill process with keepalive greater than timeout 
+
 
 # Websocket Server Protocol for stats unbuffered output streaming
 class statsocks(WebSocketServerProtocol):
@@ -77,9 +82,11 @@ class statsocks(WebSocketServerProtocol):
         print(payload,type(payload))
         uid = payload.decode()
         if uid in services.active.keys():
-            threading.Thread(name=f"stats-{uid}",target=download_monitor,args=(self,uid,isBinary)).start() #threading to avoid blocking
+            threading.Thread(name=f"stats-{uid}",target=download_monitor,args=(self,uid,isBinary)).start() 
+            #threading to avoid blocking for multiple clients
         else:
              self.sendMessage(payload, isBinary)
+
     def onClose(self, wasClean, code, reason):
         print("Stats Monitor disconnected")
     
@@ -88,22 +95,25 @@ class statsocks(WebSocketServerProtocol):
 #Main Websocket Listener Activity Handler Function 
 def websocket_message_handler(self,payload,isBinary):
     payload = json.loads(payload.decode("utf-8"))        
+    if payload["uid"] not in services.active.keys():
+        services.active[str(uid)] = None    # cause most browsers just use the cache at times so adding it from here
 
     if payload["message"] == "started":
         services.player(uid=payload["uid"],magnet = payload["magnet"],configs=configs,webplayer_args=webplayer_args)
+        #starting a subprocess instance for webtorrent
         message_to_send = json.dumps(payload).encode()
 
     
     elif payload["message"] == "keepalive":
-        scrape_status = services.active[payload["uid"]]["scraped"]
+        scrape_status = services.active[payload["uid"]]["scraped"] 
         subtitle_status = services.active[payload["uid"]]["subtitles"]
 
         if  scrape_status == "Not Started":
             print("Not scraped or scraping not completed")
-            threading.Thread(name=f'scrape-{payload["uid"]}', target=services.scrape,args=(payload,)).start()
+            threading.Thread(name=f'scrape-{payload["uid"]}', target=services.scrape,args=(payload,)).start() #threading scrape instance
             
             if "nyaaid" in payload.keys():
-                threading.Thread(name=f'subtitles-{payload["uid"]}',target=services.ready_subs,args=(payload,)).start()
+                threading.Thread(name=f'subtitles-{payload["uid"]}',target=services.ready_subs,args=(payload,)).start() #threading subtitle download
                 subtitle_status = "running"
 
             scrape_status = "running"
@@ -121,14 +131,14 @@ def websocket_message_handler(self,payload,isBinary):
 
             message_to_send = json.dumps({"message":message[0],"uid":payload["uid"],
                                         "addr":message[1],"port":message[2],
-                                        "subtitles":message[3]}).encode()
+                                        "subtitles":message[3]}).encode()   
 
         try:
-            self.sendMessage(message_to_send,isBinary)
+            self.sendMessage(message_to_send,isBinary)  #sends a response to client after keepalive is recieved
             services.keepalivehistory[payload["uid"]] = datetime.datetime.now() #Changes last keepalive message timestamp
 
         except exception.Disconnected:
-            print(f"User with {payload['uid']} has Disconnected")
+            print(f"User with {payload['uid']} has Disconnected")   #exception required to terminate thread
 
 
 def download_monitor(self,uid,isBinary): #threads the unbuffered stdout to avoid blocking
@@ -136,8 +146,11 @@ def download_monitor(self,uid,isBinary): #threads the unbuffered stdout to avoid
 
     #Start reading stdout only after process has started
     while True:
-        if "process" in services.active[uid].keys():    
-            break
+        try:
+            if "process" in services.active[uid].keys():    
+                break
+        except AttributeError:
+            continue
 
     #Reading stdout
     for l in unbuffered_process_stdout(services.active[uid]["process"]):
